@@ -1,13 +1,12 @@
 pipeline {
     agent any
 
-	parameters {
+    parameters {
         string(name: 'GIT_JAVA_URL', defaultValue: '', description: 'URL GIT repository of Java Project')
-		
-		string(name: 'GIT_JAVA_BRANCH', defaultValue: '', description: 'URL GIT repository of Java Project')
+	    string(name: 'GIT_JAVA_BRANCH', defaultValue: '', description: 'URL GIT repository of Java Project')
+        choice(name: 'JDK_CHOICE', choices: ['jdk8', 'jdk11', 'jdk17'], description: 'Choose JDK')
+	}
 
-        choice(name: 'JDK_CHOICE', choices: ['jdk8', 'jdk11', 'jdk17'], defaultValue: 'jdk11', description: 'Choose JDK')
-    }
     tools {
         // Install the Maven version configured as "M3" and add it to the path.
         maven "Default"
@@ -19,7 +18,7 @@ pipeline {
             steps {
                 // Get some code from a GitHub repository
                 git branch: "${params.GIT_JAVA_BRANCH}",
-                url: "${params.GIT_JAVA_URL}"
+					url: "${params.GIT_JAVA_URL}"
 
                 // Run Maven on a Unix agent.
                 sh "mvn -Dmaven.test.failure.ignore=true clean package"
@@ -32,15 +31,17 @@ pipeline {
                 // If Maven was able to run the tests, even if some of the test
                 // failed, record the test results and archive the jar file.
                 success {
-                    echo 'Success !'
+                    echo 'great success (test ?)'
                     junit '**/target/surefire-reports/TEST-*.xml'
                     archiveArtifacts 'target/*.jar'
                 }
-                always{
+                
+                always {
                     echo 'Je passe toujours ici'
                 }
-                failure{
-                    echo 'ça foire ici'
+                
+                failure {
+                    echo 'a failure occured'
                 }
             }
         }
